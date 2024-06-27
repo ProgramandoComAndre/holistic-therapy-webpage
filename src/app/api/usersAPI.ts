@@ -2,8 +2,8 @@ import axios from "axios";
 
 export class UsersAPI {
 
-    static async getUsers(token:string,queryParams:string="") {
-        const response = await axios.get(`http://127.0.0.1:3001/users${queryParams? `?${queryParams}` : ""}`, {
+    static async getUsers(token:string,queryParams:any) {
+        const response = await axios.get(`${process.env.AUTH_BASE_URL}/users?${new URLSearchParams(queryParams).toString()}`, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
@@ -11,10 +11,25 @@ export class UsersAPI {
         return response.data
     }
 
+    static async createUser(token:string, request:any) {
+        const response = await axios.post(`${process.env.AUTH_BASE_URL}/users`, request, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+        return response
+    }
+
+    static async getRoles() {
+        const response = await axios.get(`${process.env.AUTH_BASE_URL}/users/roles`);
+        console.log(response)
+        return response.data
+    }
+
     static async deactivateUser(token:string, username:string) {
 
     
-        const response = await axios.patch(`http://127.0.0.1:3001/users/profile/disable/${username}`, {}, {
+        const response = await axios.patch(`${process.env.AUTH_BASE_URL}/users/profile/disable/${username}`, {}, {
             headers: {
                 Authorization: `Bearer ${token}`
             }

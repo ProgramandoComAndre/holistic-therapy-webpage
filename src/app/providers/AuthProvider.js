@@ -21,7 +21,7 @@ const AuthProvider = ({ children }) => {
     
     const loginAction = async (data) => {
         try {
-            const response = await axios.post("http://127.0.0.1:3001/users/auth", data);
+            const response = await axios.post("http://127.0.0.1:3000/users/auth", data);
             if(response.status === 200) {
                 setToken(response.data.token)
                 localStorage.setItem('token', response.data.token)

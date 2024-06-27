@@ -13,6 +13,7 @@ import Nav from './components/Nav';
 
 
 export default function Home() {
+  console.log(process.env)
   const auth = useAuth();
   let [username, setUsername] = useState('');
   let [users, setUsers] = useState([]);
@@ -39,6 +40,7 @@ export default function Home() {
     <>
       <Nav username={username}></Nav>
       <UsersProvider token={token}></UsersProvider>
+      
 
     </>
     

@@ -19,7 +19,7 @@ function Users(props) {
     const [users, setUsers] = useState([]);
     const [name, setName] = useState('');
     const [deleteUsername, setDeleteUsername] = useState('');
-
+    const [currentPage, setCurrentPage]= useState(1)
     const deleteMutation = useMutation({
       mutationFn: async (params) => {
         return UsersAPI.deactivateUser(params.token, params.username);
@@ -33,16 +33,28 @@ function Users(props) {
     });
 
     const query = useQuery({
-      queryKey: [`users/${name}`],
+      queryKey: [`users/${name}/${currentPage}`],
       queryFn: async () => {
-        const cache = getFromCache(`users/${name}`);
-        if(cache) {
-          return cache
+
+        const queryParams = {
+          name: name.length > 0 ? name : undefined,
+          page: currentPage,
+          limit: 10
         }
-        return UsersAPI.getUsers(props.token, name ? `name=${name}` : '');
-      },
-      staleTime:
+
+        if(!queryParams.name?.length > 0) {
+          delete queryParams.name
+        }
+
+        return UsersAPI.getUsers(props.token, queryParams);
+      }
     });
+
+    const onUserViewClick = (username, rolename) => {
+      if(rolename == "therapist") {
+        window.location.href = "/therapist/"+username
+      }
+    }
   
     const onNameChange = (e) => {
       setName(e.target.value);
@@ -71,10 +83,15 @@ function Users(props) {
   
     return (
       <>
-        <input type="text" value={name} onChange={onNameChange} />
         <Container className="table-responsive mt-5">
+          <nav className='navbar justify-content-start gap-3'>
+          <label htmlFor="name">Name</label>
+          <input type="text" name='name' value={name} onChange={onNameChange} />
+          <a href='/register/user'><Button>New User</Button></a>
+         
+          
+          </nav>
           <Table striped bordered hover>
-            <caption>List of users</caption>
             <thead>
               <tr>
                 <th>#</th>
@@ -84,7 +101,7 @@ function Users(props) {
               </tr>
             </thead>
             <tbody>
-              {query.data?.map((user, index) => (
+              {query.data?.users.map((user, index) => (
                 <tr key={user.id}>
                   <td>{user.id}</td>
                   <td>{user.name}</td>
@@ -92,7 +109,7 @@ function Users(props) {
                   <td>{user.rolename}</td>
                   <td className="text-center">
                     <Container className="d-flex align-items-center gap-3">
-                      <Eye size={20} style={{ color: 'orange' }} />
+                      <Eye size={20} style={{ color: 'orange' }} onClick={(e) => onUserViewClick(user.username, user.rolename)}/>
                       <Pencil size={20} style={{ color: 'blue' }} />
                       <XLg size={20} style={{ color: 'red' }} onClick={(e)=> handleShowModal(user.username)} />
                     </Container>
@@ -101,7 +118,19 @@ function Users(props) {
               ))}
             </tbody>
           </Table>
-  
+          <nav className='navbar justify-content-center'>
+      <ul className="d-flex pagination gap-3">
+        <li className={`  ${currentPage=== 1 ? 'disabled' : ''}`}>
+          <a className="page-link" href="#" onClick={() => setCurrentPage(currentPage - 1)}>Prev</a>
+        </li>
+        <li>{currentPage}</li>
+        <li className={` ${currentPage * 10 >= query.data?.itemsCount ? 'disabled' : ''}`}>
+          <a className="page-link w-100" href="#" onClick={() => setCurrentPage(currentPage+1)}>Next</a>
+        </li>
+
+      </ul>
+      
+      </nav>
           
         </Container>
 
